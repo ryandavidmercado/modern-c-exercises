@@ -1,0 +1,23 @@
+The most common form of I/O buffering for text files is line buffering C . In that
+mode, output is only physically written if the end of a text line is encountered. So,
+usually, text that is written with puts appears immediately on the terminal; fputs
+waits until it encounters an '\n' in the output. Another interesting thing about text
+streams and files is that there is no one-to-one correspondence between characters
+that are written in the program and bytes that land on the console device or in the
+file.
+TAKEAWAY 8.11 Text input and output converts data.
+Text input and output converts data because internal and external representations
+of text characters are not necessarily the same. Unfortunately, there are still many
+different character encodings; the C library is in charge of doing the conversions
+correctly, if it can. Most notoriously, the end-of-line encoding in files is platform
+dependent.
+TAKEAWAY 8.12 There are several commonly used conversions to encode
+end-of-line.
+C gives us a very suitable abstraction in using '\n' for this, regardless of the platform.
+Another modification you should be aware of when doing text I/O is that white space
+that precedes the end of line may be suppressed. Therefore, the presence of trailing
+white space C such as blank or tabulator characters cannot be relied upon and should
+be avoided.
+TAKEAWAY 8.13 Text lines should not contain trailing white space.
+The C library additionally also has very limited support for manipulating files within
+the filesystem:

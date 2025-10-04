@@ -1,0 +1,5 @@
+[INFO] ~~~test.txt~~~
+[INFO] foo.txt -> bar.txt
+[INFO] ~~~test.txt~~~
+[INFO] ~~~test.txt~~~
+[INFO] foo.txt -> bar.txt
