@@ -1,16 +1,9 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+#include "text-processing.h"
 
-int search_word(char const needle[static 1], char const haystack[static 1]);
-char *find_and_replace(char const *text, char const *find, char const *replace);
-
-struct search_test {
-  char const *needle;
-  char const *haystack;
-  int expected;
-};
-typedef struct search_test search_test;
+void print_bracket_expr(bracket_expr *expr);
 
 bool test_search_word() {
   bool fail = false;
@@ -41,13 +34,6 @@ bool test_search_word() {
   return fail;
 }
 
-struct replace_test {
-  char const *text;
-  char const *find;
-  char const *replace;
-  char const *expected;
-};
-typedef struct replace_test replace_test;
 
 bool test_find_and_replace() {
   bool fail = false;
@@ -72,5 +58,99 @@ bool test_find_and_replace() {
     }
   }
 
+  return fail;
+}
+
+bool test_match_class() {
+  bool fail = false;
+
+  match_class_test tests[] = {
+    (match_class_test){ .text = "words 39378 more words", .class_start = '0', .class_end = '9', .expected = &(char){'3'}, },
+    (match_class_test){ .text = "39378 words more words", .class_start = 'a', .class_end = 'z', .expected = &(char){'w'}, },
+    (match_class_test){ .text = "39378 lowercase UPPER",  .class_start = 'A', .class_end = 'Z', .expected = &(char){'U'}, },
+    (match_class_test){ .text = "39378",                  .class_start = 'A', .class_end = 'Z', .expected = nullptr,      },
+  };
+
+  for (size_t i = 0; i < (sizeof tests / sizeof tests[0]); ++i) {
+    match_class_test test = tests[i];
+    char const *result = match_class(test.text, test.class_start, test.class_end);
+
+    printf("test_match_class %zu: match_class(\"%s\", '%c', '%c')\n", i + 1, test.text, test.class_start, test.class_end);
+
+    if(!test.expected) {
+      if(result) {
+        printf("  FAIL: expected nullptr, got '%c'\n", *result);
+        fail = true;
+      } else {
+        printf("  PASS\n");
+      }
+    } else {
+      if(!result) {
+        printf("  FAIL: expected '%c', got nullptr\n", *test.expected);
+        fail = true;
+      } else if(*test.expected != *result) {
+        printf("  FAIL: expected '%c', got '%c'\n", *test.expected, *result);
+        fail = true;
+      } else {
+        printf("  PASS\n");
+      }
+    }
+  }
+
+  return fail;
+}
+
+bool test_match_class_negated() {
+  bool fail = false;
+
+  match_class_test tests[] = {
+    (match_class_test){ .text = "words 39378 more words", .class_start = 'a', .class_end = 'z', .expected = &(char){' '}, },
+    (match_class_test){ .text = "39378_words more words", .class_start = '0', .class_end = '9', .expected = &(char){'_'}, },
+    (match_class_test){ .text = "39378 lowercase UPPER",  .class_start = 'A', .class_end = 'Z', .expected = &(char){'3'}, },
+    (match_class_test){ .text = "39378",                  .class_start = '0', .class_end = '9', .expected = nullptr,      },
+  };
+
+  for (size_t i = 0; i < (sizeof tests / sizeof tests[0]); ++i) {
+    match_class_test test = tests[i];
+    char const *result = match_class_negated(test.text, test.class_start, test.class_end);
+
+    printf("test_match_class_negated %zu: match_class_negated(\"%s\", '%c', '%c')\n", i + 1, test.text, test.class_start, test.class_end);
+
+    if(!test.expected) {
+      if(result) {
+        printf("  FAIL: expected nullptr, got '%c'\n", *result);
+        fail = true;
+      } else {
+        printf("  PASS\n");
+      }
+    } else {
+      if(!result) {
+        printf("  FAIL: expected '%c', got nullptr\n", *test.expected);
+        fail = true;
+      } else if(*test.expected != *result) {
+        printf("  FAIL: expected '%c', got '%c'\n", *test.expected, *result);
+        fail = true;
+      } else {
+        printf("  PASS\n");
+      }
+    }
+  }
+
+  return fail;
+}
+
+bool test_read_bracket_expr() {
+  bool fail = false;
+
+  char const *exprs[] = {
+    "[^0-9]",
+    "[[:digit:]]",
+    "hello"
+  };
+
+  for(size_t i = 0; i < (sizeof exprs / sizeof exprs[0]); ++i) {
+    print_bracket_expr(read_bracket_expr(exprs[i]));
+  }
+  
   return fail;
 }
